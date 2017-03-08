@@ -101,8 +101,7 @@ public class UnityRunnerBuildServiceFactory implements CommandLineBuildServiceFa
                 }
 
                 // find and record the *latest* version of Unity in unity.latest
-                String latestVersion = "0";
-                String latestVersionPath = null;
+                String latestVersion = null;
 
                 // add those unity versions to the Agent Configuration
                 for (Map.Entry<String,String> foundVersion : foundUnityVersions.entrySet()) {
@@ -116,18 +115,17 @@ public class UnityRunnerBuildServiceFactory implements CommandLineBuildServiceFa
                             PluginConstants.CONFIGPARAM_UNITY_BASE_VERSION + version,
                             path);
 
-                    if (UnityVersionComparison.isGreaterThan(version, latestVersion)) {
+                    if (latestVersion == null || UnityVersionComparison.isGreaterThan(version, latestVersion)) {
                         latestVersion = version;
-                        latestVersionPath = path;
                     }
                 }
 
-                if (latestVersionPath != null) {
+                if (latestVersion != null) {
                     // record the latest version found
                     agentConfiguration.addConfigurationParameter(
                             PluginConstants.CONFIGPARAM_UNITY_LATEST_VERSION,
-                            latestVersionPath);
-                    Loggers.AGENT.info("Latest unity version = " + latestVersion + " at: " + latestVersionPath);
+                            latestVersion);
+                    Loggers.AGENT.info("Latest unity version = " + latestVersion);
 
                     // add log location (which is oddly the same regardless of version)
                     String logPath = UnityRunnerConfiguration.getUnityLogPath(platform);
@@ -216,8 +214,3 @@ public class UnityRunnerBuildServiceFactory implements CommandLineBuildServiceFa
         };
     }
 }
-
-
-
-
-

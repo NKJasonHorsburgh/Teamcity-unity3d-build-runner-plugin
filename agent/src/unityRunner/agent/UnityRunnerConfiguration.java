@@ -77,18 +77,12 @@ public class UnityRunnerConfiguration {
         unityExecutablePath = FilenameUtils.separatorsToSystem(
                 Parameters.getString(runnerParameters, PluginConstants.PROPERTY_UNITY_EXECUTABLE_PATH));
 
-        unityVersion = Parameters.getString(runnerParameters, PluginConstants.PROPERTY_UNITY_VERSION);
-        if (isSet(unityVersion)) {
-            // look up the path to the specified unity version in Agent Configuration Parameters
-            detectedUnityVersionPath = Parameters.getString(
-                    agentConfiguration.getConfigurationParameters(),
-                    "unity." + unityVersion);
-        } else {
-            // default to use 'latest' version of unity that was previously found
-            detectedUnityVersionPath = Parameters.getString(
-                    agentConfiguration.getConfigurationParameters(),
-                    PluginConstants.CONFIGPARAM_UNITY_LATEST_VERSION);
-        }
+        unityVersion = getUnityVersion(agentConfiguration, runnerParameters);
+
+        // look up the path to the specified unity version in Agent Configuration Parameters
+        detectedUnityVersionPath = Parameters.getString(
+                agentConfiguration.getConfigurationParameters(),
+                PluginConstants.CONFIGPARAM_UNITY_BASE_VERSION + unityVersion);
 
         lineListPath = FilenameUtils.separatorsToSystem(Parameters.getString(runnerParameters, PluginConstants.PROPERTY_LINELIST_PATH));
         executeMethod = Parameters.getString(runnerParameters, PluginConstants.PROPERTY_EXECUTE_METHOD);
@@ -112,6 +106,18 @@ public class UnityRunnerConfiguration {
 
     }
 
+    String getUnityVersion(BuildAgentConfiguration agentConfiguration,
+                           Map<String, String> runnerParameters) {
+        String setUnityVersion = Parameters.getString(runnerParameters, PluginConstants.PROPERTY_UNITY_VERSION);
+        if (!isSet(setUnityVersion)) {
+            // default to using the 'latest' version of unity that was previously found
+            return Parameters.getString(
+                    agentConfiguration.getConfigurationParameters(),
+                    PluginConstants.CONFIGPARAM_UNITY_LATEST_VERSION);
+        }
+
+        return setUnityVersion;
+    }
 
     /**
      * get path to unity executable
@@ -135,11 +141,11 @@ public class UnityRunnerConfiguration {
     String getUnityLogPath() {
         return getUnityLogPath(platform);
     }
-    
+
     String getCleanedLogPath() {
         return cleanedLogPath.getPath();
     }
-    
+
     String getInterestedLogPath() {
         if (useCleanedLog) {
             return getCleanedLogPath();
@@ -234,5 +240,3 @@ public class UnityRunnerConfiguration {
         return str != null && !str.isEmpty();
     }
 }
-
-
